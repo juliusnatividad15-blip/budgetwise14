@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BudgetWise</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#F5EDE0;--paper:#FFF9F0;--card:#FFFcf7;--muted:#F0E4D4;--border:#E5D5C0;
+  --text:#3D3228;--body:#5C4E42;--soft:#9A8B78;
+  --sage:#7BA88A;--sage-d:#4F7A5E;--sage-l:#E4F0E6;
+  --peach:#E8A87C;--peach-l:#FCE8D8;--rose:#D4897A;--rose-l:#F9E4DE;
+  --mint:#A8C5B0;--sky:#A8C4D4;--lav:#C4B0D4;
+  --r:18px;--shadow:0 4px 16px rgba(90,70,40,.08),0 1px 3px rgba(90,70,40,.05);
+  --shadow-lg:0 12px 32px rgba(90,70,40,.12);
+}
+html.dark{
+  --bg:#1C201C;--paper:#252B26;--card:#2A322C;--muted:#343C36;--border:#3E4840;
+  --text:#E6EDE8;--body:#C2CDC6;--soft:#8A968E;
+  --sage:#7BAF8C;--sage-d:#5A9A72;--sage-l:#2A3D32;
+  --peach:#D4A96A;--peach-l:#3D3428;--rose:#D4897A;--rose-l:#3D2A28;
+  --mint:#5A7A62;--sky:#4A6A7A;--lav:#6A5A7A;
+  --shadow:0 4px 16px rgba(0,0,0,.25);--shadow-lg:0 12px 32px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Quicksand,system-ui,sans-serif;background:var(--bg);color:var(--text);
+background-image:radial-gradient(ellipse 50% 40% at 10% 0%,rgba(123,168,138,.1),transparent 55%),
+radial-gradient(ellipse 45% 35% at 95% 5%,rgba(232,168,124,.08),transparent 50%);
+background-attachment:fixed;min-height:100vh;transition:background .4s,color .35s}
+html.dark body{background-image:radial-gradient(ellipse 50% 40% at 10% 0%,rgba(123,168,138,.15),transparent 55%),
+radial-gradient(ellipse 45% 35% at 95% 5%,rgba(232,168,124,.06),transparent 50%)}
+button{font-family:inherit;cursor:pointer;border:none;background:none;transition:transform .18s cubic-bezier(.22,1,.36,1),background .2s,color .2s,box-shadow .2s,filter .2s}
+button:active{transform:scale(.95)}
+input,select,textarea{font-family:inherit;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:14px;padding:10px 14px;font-size:14px;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px rgba(123,168,138,.22)}
+@keyframes pageIn{from{opacity:0;transform:translateY(12px) scale(.99)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.92) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes softBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.page-enter{animation:pageIn .42s cubic-bezier(.22,1,.36,1) both}
+.pop{animation:pop .32s cubic-bezier(.22,1,.36,1) both}
+.fade{animation:fade .25s both}
+.slide-up{animation:slideUp .35s cubic-bezier(.22,1,.36,1) both}
+.card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);transition:background .35s,border-color .35s,transform .25s,box-shadow .25s}
+.card:hover{box-shadow:var(--shadow-lg)}
+.btn-primary{background:var(--sage);color:#fff;border-radius:14px;padding:12px 18px;font-weight:600;font-size:14px;box-shadow:0 3px 10px rgba(123,168,138,.3)}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn-danger{background:transparent;color:var(--rose);border:1.5px solid color-mix(in srgb,var(--rose) 40%,transparent);border-radius:14px;padding:12px 18px;font-weight:600;font-size:14px}
+.btn-danger:hover{background:var(--rose-l)}
+.btn-ghost{border:1.5px solid var(--border);border-radius:14px;padding:10px 16px;font-size:13px;color:var(--body)}
+.btn-ghost:hover{background:var(--muted)}
+.nav-pill{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--body);white-space:nowrap;transition:all .25s cubic-bezier(.22,1,.36,1)}
+.nav-pill:hover{background:var(--muted);color:var(--sage-d)}
+.nav-pill.active{background:var(--sage-d);color:#fff;box-shadow:0 3px 12px rgba(79,122,94,.35);transform:scale(1.03)}
+.progress{height:9px;border-radius:999px;background:var(--muted);overflow:hidden}
+.progress>i{display:block;height:100%;border-radius:999px;transition:width .55s cubic-bezier(.22,1,.36,1)}
+.header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1.5px solid var(--border);transition:background .35s}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;padding:12px 20px;border-radius:14px;font-size:13px;font-weight:600;color:#fff;box-shadow:var(--shadow-lg);animation:slideUp .35s cubic-bezier(.22,1,.36,1)}
+.overlay{position:fixed;inset:0;background:rgba(40,30,20,.35);backdrop-filter:blur(5px);z-index:60;animation:fade .2s both;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--card);border-radius:22px;padding:24px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);border:1.5px solid var(--border);animation:pop .32s cubic-bezier(.22,1,.36,1)}
+.cal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cal-cell{padding:10px 4px;border-radius:12px;font-size:12px;font-weight:600;text-align:center;color:var(--body);transition:all .2s}
+.cal-cell:hover{background:var(--muted)}
+.cal-cell.on{background:var(--sage-d);color:#fff;transform:scale(1.06);box-shadow:0 2px 8px rgba(79,122,94,.3)}
+.hidden{display:none!important}
+.avatar{width:80px;height:80px;border-radius:50%;background:var(--sage-d);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin:0 auto;box-shadow:0 4px 14px rgba(79,122,94,.25)}
+@media(max-width:768px){
+  .desk-nav{display:none!important}
+  .mob-menu-btn{display:flex!important}
+}
+@media(min-width:769px){
+  .mob-menu-btn{display:none!important}
+  .mob-nav{display:none!important}
+  .desk-nav{display:flex!important}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const peso=n=>'₱'+Number(n||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const PM=['Cash','GCash','Bank Transfer','Credit Card'];
+const I={
+d:'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+t:'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z',
+c:'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z',
+r:'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+g:'M13 10V3L4 14h7v7l9-11h-7z',
+b:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+u:'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+ch:'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+e:'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+p:'M12 4v16m8-8H4',
+x:'M6 18L18 6M6 6l12 12',
+tr:'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
+mo:'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z',
+su:'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
+dl:'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4',
+rp:'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+mn:'M4 6h16M4 12h16M4 18h16',
+cal:'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
+};
+const ic=(n,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${I[n]||I.d}"/></svg>`;
+const logo=s=>`<svg width="${s}" height="${s}" viewBox="0 0 64 64" fill="none"><rect x="8" y="24" width="48" height="30" rx="7" fill="#B5D0AD"/><rect x="12" y="28" width="40" height="22" rx="4" fill="#C8DEC2" opacity=".45"/><circle cx="46" cy="39" r="3.5" fill="#2F3D36"/><circle cx="46" cy="39" r="1.5" fill="#B5D0AD"/><path d="M16 24V20c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v4" stroke="#B5D0AD" stroke-width="4" stroke-linecap="round" fill="none"/><ellipse cx="22" cy="12" rx="9" ry="5.5" transform="rotate(-35 22 12)" fill="#6FAF6C"/></svg>`;
+const bc=p=>p>=100?'var(--rose)':p>=90?'var(--peach)':p>=70?'#C4A77D':'var(--sage)';
+
+const S={
+get(k,d){try{const v=localStorage.getItem('bw2_'+k);return v?JSON.parse(v):d}catch{return d}},
+set(k,v){localStorage.setItem('bw2_'+k,JSON.stringify(v))}
+};
+
+function seed(){
+if(S.get('ok5'))return;
+S.set('cats',[
+{id:'c1',name:'Food & Dining',type:'expense',color:'#7BA88A'},
+{id:'c2',name:'Transport',type:'expense',color:'#E8A87C'},
+{id:'c3',name:'Utilities',type:'expense',color:'#D4897A'},
+{id:'c4',name:'Entertainment',type:'expense',color:'#9A8B78'},
+{id:'c5',name:'Salary',type:'income',color:'#4F7A5E'},
+{id:'c6',name:'Freelance',type:'income',color:'#5A9A72'}
+]);
+S.set('txs',[
+{id:'t1',type:'income',amount:35000,date:'2026-09-01',description:'Salary',category_id:'c5',category_name:'Salary',payment_method:'Bank Transfer'},
+{id:'t2',type:'expense',amount:2450,date:'2026-09-04',description:'Grocery',category_id:'c1',category_name:'Food & Dining',payment_method:'GCash'},
+{id:'t3',type:'expense',amount:680,date:'2026-09-03',description:'Grab',category_id:'c2',category_name:'Transport',payment_method:'GCash'},
+{id:'t4',type:'expense',amount:3200,date:'2026-09-02',description:'Meralco',category_id:'c3',category_name:'Utilities',payment_method:'Credit Card'},
+{id:'t5',type:'income',amount:10200,date:'2026-09-01',description:'Freelance',category_id:'c6',category_name:'Freelance',payment_method:'GCash'},
+{id:'t6',type:'expense',amount:549,date:'2026-08-28',description:'Netflix',category_id:'c4',category_name:'Entertainment',payment_method:'Credit Card'},
+{id:'t7',type:'income',amount:35000,date:'2026-08-05',description:'Salary',category_id:'c5',category_name:'Salary',payment_method:'Bank Transfer'},
+{id:'t8',type:'expense',amount:1800,date:'2026-08-15',description:'Dining',category_id:'c1',category_name:'Food & Dining',payment_method:'Cash'},
+{id:'t8b',type:'income',amount:2000,date:'2026-08-10',description:'Cash tips',category_id:'c6',category_name:'Freelance',payment_method:'Cash'},
+{id:'t9',type:'income',amount:34000,date:'2026-07-05',description:'Salary',category_id:'c5',category_name:'Salary',payment_method:'Bank Transfer'},
+{id:'t10',type:'expense',amount:2100,date:'2026-07-12',description:'Groceries',category_id:'c1',category_name:'Food & Dining',payment_method:'GCash'},
+{id:'t11',type:'expense',amount:900,date:'2026-07-18',description:'Commute',category_id:'c2',category_name:'Transport',payment_method:'Cash'},
+{id:'t12',type:'income',amount:8000,date:'2026-07-22',description:'Side project',category_id:'c6',category_name:'Freelance',payment_method:'GCash'},
+{id:'t13',type:'income',amount:33000,date:'2026-06-05',description:'Salary',category_id:'c5',category_name:'Salary',payment_method:'Bank Transfer'},
+{id:'t14',type:'expense',amount:4500,date:'2026-06-10',description:'Electric+Water',category_id:'c3',category_name:'Utilities',payment_method:'Bank Transfer'},
+{id:'t15',type:'expense',amount:1200,date:'2026-06-20',description:'Movies',category_id:'c4',category_name:'Entertainment',payment_method:'Credit Card'},
+{id:'t16',type:'income',amount:32000,date:'2026-05-05',description:'Salary',category_id:'c5',category_name:'Salary',payment_method:'Bank Transfer'},
+{id:'t17',type:'expense',amount:2800,date:'2026-05-14',description:'Market',category_id:'c1',category_name:'Food & Dining',payment_method:'Cash'},
+{id:'t18',type:'expense',amount:1500,date:'2026-05-22',description:'Gas',category_id:'c2',category_name:'Transport',payment_method:'Cash'},
+{id:'t19',type:'income',amount:31000,date:'2025-12-05',description:'Salary',category_id:'c5',category_name:'Salary',payment_method:'Bank Transfer'},
+{id:'t20',type:'expense',amount:5000,date:'2025-12-15',description:'Holiday dinner',category_id:'c1',category_name:'Food & Dining',payment_method:'GCash'},
+{id:'t21',type:'expense',amount:3000,date:'2025-12-20',description:'Gifts',category_id:'c4',category_name:'Entertainment',payment_method:'Credit Card'},
+{id:'t22',type:'income',amount:30000,date:'2025-11-05',description:'Salary',category_id:'c5',category_name:'Salary',payment_method:'Bank Transfer'},
+{id:'t23',type:'expense',amount:2200,date:'2025-11-11',description:'Groceries',category_id:'c1',category_name:'Food & Dining',payment_method:'GCash'}
+]);
+S.set('buds',[
+{id:'b1',category_id:'c1',category_name:'Food & Dining',amount:12000,month:9,year:2026},
+{id:'b2',category_id:'c2',category_name:'Transport',amount:6000,month:9,year:2026},
+{id:'b3',category_id:'c3',category_name:'Utilities',amount:7000,month:9,year:2026},
+{id:'b4',category_id:'c1',category_name:'Food & Dining',amount:11000,month:8,year:2026},
+{id:'b5',category_id:'c2',category_name:'Transport',amount:5500,month:8,year:2026},
+{id:'b6',category_id:'c1',category_name:'Food & Dining',amount:10000,month:7,year:2026},
+{id:'b7',category_id:'c3',category_name:'Utilities',amount:6500,month:6,year:2026}
+]);
+S.set('goals',[{id:'g1',name:'Laptop Fund',target:25000,current:6500,deadline:'2026-12-31'},{id:'g2',name:'Emergency Fund',target:50000,current:18000,deadline:null}]);
+S.set('debts',[{id:'d1',name:'Phone installment',total:15000,paid:7500,inst:2500,due:15,creditor:'Shopee',status:'active'},{id:'d2',name:'Personal loan',total:40000,paid:12000,inst:4000,due:5,creditor:'Bank',status:'active'}]);
+S.set('rec',[{id:'r1',type:'income',amount:35000,description:'Salary',day:5,active:1,pay:'Bank Transfer'},{id:'r2',type:'expense',amount:8500,description:'Rent',day:1,active:1,pay:'Bank Transfer'}]);
+S.set('reqs',[]);
+S.set('users',[
+{id:'u1',name:'Admin User',email:'admin@budgetwise.test',password:'password123',role:'admin',birthday:'1990-05-12',sex:'female'},
+{id:'u2',name:'Juan Dela Cruz',email:'user@budgetwise.test',password:'password123',role:'user',birthday:'1998-03-22',sex:'male'}
+]);
+S.set('ok5',1);
+}
+
+const st={
+user:S.get('sess'),page:'dashboard',dark:!!S.get('dark'),auth:'login',
+month:9,year:2026,calOpen:false,menu:false,prof:false,modal:null,toast:null,
+dismissed:[],showRec:false,editProf:false,infoStep:0,passStep:0,delStep:0,
+filter:{type:'all',q:'',cat:'',pay:''}
+};
+
+function dark(){document.documentElement.classList.toggle('dark',st.dark);S.set('dark',st.dark)}
+function toast(m,t='ok'){st.toast={m,t};render();setTimeout(()=>{st.toast=null;render()},2800)}
+function go(p){st.page=p;st.menu=0;st.prof=0;st.modal=null;st.calOpen=0;st.editProf=0;st.infoStep=0;st.passStep=0;st.delStep=0;window.scrollTo({top:0,behavior:'smooth'});render()}
+function login(e,p){const u=S.get('users',[]).find(x=>x.email===e&&x.password===p);if(!u)return0;st.user={id:u.id,name:u.name,email:u.email,role:u.role,birthday:u.birthday||null,sex:u.sex||null};S.set('sess',st.user);st.page='dashboard';return1}
+function calcAge(b){if(!b)return null;const d=new Date(b),n=new Date();let a=n.getFullYear()-d.getFullYear();const m=n.getMonth()-d.getMonth();if(m<0||(m===0&&n.getDate()<d.getDate()))a--;return a}
+function walletNet(method, upToDate){
+  const list=S.get('txs',[]);
+  let n=0;
+  list.filter(x=>(x.payment_method||'')===method).filter(x=>!upToDate||x.date<=upToDate).forEach(x=>{n+=x.type==='income'?+x.amount:-x.amount});
+  return n;
+}
+function canPay(method, amount, date, type){
+  if(type!=='expense')return {ok:1};
+  const m=method||'';
+  if(/credit/i.test(m)){
+    const limit=S.get('creditLimit',25000);
+    const used=Math.max(0,-walletNet('Credit Card', date));
+    if(used+Number(amount)>limit)return {ok:0,msg:'Lampas sa credit limit ('+peso(limit)+').'};
+    return {ok:1};
+  }
+  if(/cash|gcash|bank/i.test(m)){
+    const bal=walletNet(m, date);
+    if(bal<Number(amount))return {ok:0,msg:'Kulang ang '+m+' (available '+peso(Math.max(0,bal))+'). Gumamit ng Credit Card o maglagay muna ng funds.'};
+    return {ok:1};
+  }
+  return {ok:1};
+}
+function pieSvg(entries, size=140){
+  const total=entries.reduce((s,e)=>s+e.v,0)||1;
+  const colors=entries.map(e=>e.color);
+  let acc=0;
+  const cx=size/2,cy=size/2,r=size/2-6,ri=r*0.55;
+  const slices=entries.map((e,i)=>{
+    const start=acc/total*2*Math.PI-Math.PI/2;
+    acc+=e.v;
+    const end=acc/total*2*Math.PI-Math.PI/2;
+    const large=end-start>Math.PI?1:0;
+    const x1=cx+r*Math.cos(start),y1=cy+r*Math.sin(start);
+    const x2=cx+r*Math.cos(end),y2=cy+r*Math.sin(end);
+    const xi1=cx+ri*Math.cos(start),yi1=cy+ri*Math.sin(start);
+    const xi2=cx+ri*Math.cos(end),yi2=cy+ri*Math.sin(end);
+    const d=`M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} L ${xi2} ${yi2} A ${ri} ${ri} 0 ${large} 0 ${xi1} ${yi1} Z`;
+    return `<path d="${d}" fill="${e.color}" stroke="var(--card)" stroke-width="2"><title>${e.name}: ${peso(e.v)}</title></path>`;
+  }).join('');
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${slices}<circle cx="${cx}" cy="${cy}" r="${ri-2}" fill="var(--card)"/><text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text)">Expenses</text><text x="${cx}" y="${cy+12}" text-anchor="middle" font-size="10" fill="var(--soft)">${peso(total)}</text></svg>`;
+}
+function syncUser(partial){st.user={...st.user,...partial};S.set('sess',st.user);const users=S.get('users',[]);const u=users.find(x=>x.id===st.user.id);if(u){Object.assign(u,partial);S.set('users',users)}}
+function logout(){st.user=null;S.set('sess',null);render()}
+function txs(m=st.month,y=st.year){return S.get('txs',[]).filter(t=>{const d=new Date(t.date+'T00:00:00');return d.getMonth()+1===m&&d.getFullYear()===y})}
+function spent(cid,cname){return txs().filter(t=>t.type==='expense'&&(t.category_id===cid||(cname&&t.category_name===cname))).reduce((s,t)=>s+Number(t.amount),0)}
+function csv(){const rows=[['Date','Description','Category','Type','Payment','Amount'],...txs().map(t=>[t.date,t.description||'',t.category_name||'',t.type,t.payment_method||'',t.amount])];const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n')],{type:'text/csv'}));a.download=`budgetwise-${st.year}-${String(st.month).padStart(2,'0')}.csv`;a.click()}
+
+function calPicker(){
+return `<div class="relative">
+<button type="button" id="cal-btn" class="btn-ghost flex items-center gap-2" style="padding:8px 12px">${ic('cal',14)} ${MONTHS[st.month-1]} ${st.year}</button>
+${st.calOpen?`<div class="absolute right-0 top-full mt-2 z-50 card p-3 pop" style="width:260px">
+<div class="flex items-center justify-between mb-2">
+<button type="button" id="cal-prev" class="p-1.5 rounded-lg hover:bg-[var(--muted)]" style="font-size:16px">‹</button>
+<span class="font-semibold text-sm">${st.year}</span>
+<button type="button" id="cal-next" class="p-1.5 rounded-lg hover:bg-[var(--muted)]" style="font-size:16px">›</button>
+</div>
+<div class="cal-grid">${MONTHS.map((m,i)=>`<button type="button" class="cal-cell ${st.month===i+1?'on':''}" data-m="${i+1}">${m.slice(0,3)}</button>`).join('')}</div>
+</div><div class="fixed inset-0 z-40" id="cal-bg"></div>`:''}
+</div>`;
+}
+
+function navItems(){
+const a=[{id:'dashboard',l:'Dashboard',i:'d'},{id:'transactions',l:'Transactions',i:'t'},{id:'categories',l:'Categories',i:'c'},{id:'reports',l:'Reports',i:'r'},{id:'goals',l:'Goals',i:'g'},{id:'debts',l:'Debts',i:'b'}];
+if(st.user?.role==='admin'){a.push({id:'admin-users',l:'Users',i:'u'},{id:'admin-requests',l:'Requests',i:'c'},{id:'admin-analytics',l:'Analytics',i:'ch'})}
+return a;
+}
+
+function shell(body){
+const items=navItems();
+const ini=(st.user?.name||'?').split(/\s+/).map(p=>p[0]).join('').slice(0,2).toUpperCase();
+const pend=S.get('reqs',[]).filter(r=>r.status==='pending').length;
+return `
+<header class="header">
+<div style="max-width:1200px;margin:0 auto;padding:0 16px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+<div style="display:flex;align-items:center;gap:10px">
+<button type="button" id="btn-menu" class="mob-menu-btn p-2 rounded-xl" style="color:var(--body)">${ic('mn',20)}</button>
+<div style="display:flex;align-items:center;gap:8px">${logo(30)}<span style="font-weight:700;font-size:15px" class="hide-xs"><span style="color:var(--sage)">Budget</span>Wise</span></div>
+</div>
+<nav class="desk-nav" style="align-items:center;gap:4px;background:var(--muted);border-radius:999px;padding:4px;overflow-x:auto;max-width:60vw">
+${items.map(it=>{const col=({d:'#7BA88A',t:'#E8A87C',c:'#A8C4D4',r:'#C4B0D4',g:'#E0B15C',b:'#D4897A',u:'#8BA888',ch:'#9DC3C2'})[it.i]||'#7BA88A';return`<button type="button" class="nav-pill ${st.page===it.id?'active':''}" data-go="${it.id}"><span style="width:22px;height:22px;border-radius:8px;background:${st.page===it.id?'rgba(255,255,255,.25)':col+'33'};display:inline-flex;align-items:center;justify-content:center;color:${st.page===it.id?'#fff':col}">${ic(it.i,13)}</span> ${it.l}${it.id==='admin-requests'&&pend?` <span style="background:var(--rose);color:#fff;border-radius:999px;padding:1px 6px;font-size:10px">${pend}</span>`:''}</button>`}).join('')}
+</nav>
+<div style="display:flex;align-items:center;gap:6px">
+<button type="button" id="btn-dark" class="p-2 rounded-full" style="color:var(--body)">${ic(st.dark?'su':'mo',17)}</button>
+<div style="position:relative">
+<button type="button" id="btn-av" style="display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:999px">
+<div style="width:32px;height:32px;border-radius:50%;background:var(--sage-d);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">${ini}</div>
+<span style="font-size:13px;font-weight:600" class="hide-xs">${st.user?.name||''}</span>
+</button>
+${st.prof?`<div class="card pop" style="position:absolute;right:0;top:100%;margin-top:8px;width:200px;padding:12px;z-index:50">
+<div style="font-size:13px;font-weight:600;padding:0 4px">${st.user.name}</div>
+<div style="font-size:11px;color:var(--soft);padding:0 4px 8px">${st.user.role}</div>
+<button type="button" data-go="profile" class="nav-pill" style="width:100%;justify-content:flex-start">${ic('e',14)} My Profile</button>
+<button type="button" id="btn-out" class="nav-pill" style="width:100%;justify-content:flex-start;color:var(--rose)">Log out</button>
+</div>`:''}
+</div>
+</div>
+</div>
+${st.menu?`<nav class="mob-nav fade" style="border-top:1.5px solid var(--border);padding:8px 16px;display:flex;flex-direction:column;gap:4px;background:var(--paper)">
+${items.map(it=>`<button type="button" data-go="${it.id}" class="nav-pill ${st.page===it.id?'active':''}" style="width:100%;justify-content:flex-start">${ic(it.i,16)} ${it.l}</button>`).join('')}
+<button type="button" data-go="profile" class="nav-pill" style="width:100%;justify-content:flex-start">${ic('e',16)} My Profile</button>
+</nav>`:''}
+</header>
+<main style="max-width:1100px;margin:0 auto;padding:20px 16px 40px">
+<div class="page-enter">${body}</div>
+</main>
+${st.toast?`<div class="toast" style="background:${st.toast.t==='err'?'var(--rose)':'var(--sage-d)'}">${st.toast.m}</div>`:''}
+${st.modal||''}`;
+}
+function pageDash(){
+const t=txs(),inc=t.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),exp=t.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0);
+const buds=S.get('buds',[]).filter(b=>b.month===st.month&&b.year===st.year).map(b=>({...b,spent:spent(b.category_id,b.category_name)}));
+const alerts=buds.map(b=>{const p=b.amount>0?Math.round(b.spent/b.amount*100):0;if(p>=100)return{lv:'over',c:b.category_name,p,s:b.spent,b:b.amount};if(p>=90)return{lv:'crit',c:b.category_name,p,s:b.spent,b:b.amount};if(p>=70)return{lv:'warn',c:b.category_name,p,s:b.spent,b:b.amount};return null}).filter(Boolean).filter(a=>!st.dismissed.includes(a.c));
+const catMap=Object.fromEntries(S.get('cats',[]).map(c=>[c.name,c.color]));
+const cats={};t.filter(x=>x.type==='expense').forEach(x=>{cats[x.category_name]=(cats[x.category_name]||0)+Number(x.amount)});
+const catEntries=Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([n,v],i)=>({name:n,v,color:catMap[n]||['#7BA88A','#E8A87C','#D4897A','#A8C4D4','#C4B0D4','#E0B15C'][i%6]}));
+const catTotal=catEntries.reduce((s,e)=>s+e.v,0)||1;
+const ALL_PAY=['Cash','GCash','Bank Transfer','Credit Card'];
+const payIn={};const payOut={};const bal={};
+ALL_PAY.forEach(m=>{payIn[m]=0;payOut[m]=0;bal[m]=0});
+t.forEach(x=>{const m=x.payment_method||'Other';if(payIn[m]===undefined){payIn[m]=0;payOut[m]=0;bal[m]=0}
+if(x.type==='income'){payIn[m]+=+x.amount;bal[m]+=+x.amount}else{payOut[m]+=+x.amount;bal[m]-=+x.amount}});
+const creditLimit=S.get('creditLimit',25000);
+const creditUsed=Math.max(0,payOut['Credit Card']||0);
+const creditAvail=Math.max(0,creditLimit-creditUsed);
+const trend=[];for(let i=5;i>=0;i--){let m=st.month-i,y=st.year;if(m<=0){m+=12;y--}const tt=txs(m,y);trend.push({l:MONTHS[m-1].slice(0,3),i:tt.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),e:tt.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)})}
+const mx=Math.max(...trend.flatMap(x=>[x.i,x.e]),1);
+return `
+${alerts.map(a=>`<div class="card slide-up" style="padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;gap:12px;border-color:${a.lv==='warn'?'var(--peach)':'var(--rose)'};background:${a.lv==='warn'?'var(--peach-l)':'var(--rose-l)'};color:${a.lv==='warn'?'#8B6914':'var(--rose)'};font-size:13px">
+<span>${a.lv==='over'?`Lampas na ang budget sa ${a.c}`:a.lv==='crit'?`Malapit nang maubos: ${a.c}`:`Babala: ${a.p}% — ${a.c}`} · ${peso(a.s)} / ${peso(a.b)}</span>
+<button type="button" data-dis="${a.c}" style="font-size:11px;opacity:.7">Dismiss</button></div>`).join('')}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+<span style="font-size:12px;color:var(--soft)">Showing data for</span>
+${calPicker()}
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px" class="stats">
+${[['Total Income',peso(inc),'var(--sage)'],['Total Expenses',peso(exp),'var(--rose)'],['Remaining',peso(inc-exp),'var(--sage-d)'],['Savings Rate',(inc?((inc-exp)/inc*100):0).toFixed(1)+'%','var(--peach)']].map(([l,v,c])=>`<div class="card" style="padding:16px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--soft);margin-bottom:4px">${l}</div><div style="font-size:18px;font-weight:700;color:${c}">${v}</div></div>`).join('')}
+</div>
+<div class="card" style="padding:16px;margin-bottom:16px">
+<div style="font-weight:700;font-size:14px;margin-bottom:12px">Income vs Expenses</div>
+<div style="display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:8px">
+${trend.map(x=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;height:100%;min-width:0">
+<div style="display:flex;align-items:flex-end;gap:3px;width:100%;justify-content:center;flex:1">
+<div style="flex:1;max-width:28px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+<span style="font-size:9px;font-weight:700;color:var(--sage);margin-bottom:2px;white-space:nowrap">${x.i?Math.round(x.i/1000)+'k':'0'}</span>
+<div style="width:100%;border-radius:6px 6px 0 0;background:var(--sage);height:${Math.max((x.i/mx)*100,x.i?8:2)}%;min-height:2px;transition:height .5s"></div>
+</div>
+<div style="flex:1;max-width:28px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+<span style="font-size:9px;font-weight:700;color:var(--rose);margin-bottom:2px;white-space:nowrap">${x.e?Math.round(x.e/1000)+'k':'0'}</span>
+<div style="width:100%;border-radius:6px 6px 0 0;background:var(--rose);opacity:.9;height:${Math.max((x.e/mx)*100,x.e?8:2)}%;min-height:2px;transition:height .5s"></div>
+</div>
+</div>
+<span style="font-size:10px;color:var(--soft);margin-top:4px">${x.l}</span></div>`).join('')}
+</div>
+<div style="display:flex;gap:16px;justify-content:center;margin-top:10px;font-size:11px;color:var(--soft)"><span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--sage)"></span>Income</span><span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--rose)"></span>Expense</span></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px" class="two-col">
+<div class="card" style="padding:16px"><div style="font-weight:700;font-size:14px;margin-bottom:12px">Expense Categories</div>
+${catEntries.length?`<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+<div style="flex-shrink:0">${pieSvg(catEntries,150)}</div>
+<div style="flex:1;min-width:140px">${catEntries.map(e=>`<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 0">
+<span style="width:10px;height:10px;border-radius:50%;background:${e.color};flex-shrink:0"></span>
+<span style="flex:1;color:var(--body)">${e.name}</span>
+<span style="font-weight:600">${peso(e.v)}</span>
+<span style="color:var(--soft);width:40px;text-align:right">${((e.v/catTotal)*100).toFixed(0)}%</span>
+</div>`).join('')}</div>
+</div>`:'<div style="text-align:center;color:var(--soft);padding:24px;font-size:13px">No expenses</div>'}
+</div>
+<div class="card" style="padding:16px"><div style="font-weight:700;font-size:14px;margin-bottom:12px">Budget Progress</div>
+${buds.map(b=>{const p=b.amount>0?Math.round(b.spent/b.amount*100):0;return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:600">${b.category_name}</span><span style="color:var(--soft)">${peso(b.spent)} / ${peso(b.amount)}</span></div><div class="progress"><i style="width:${Math.min(p,100)}%;background:${bc(p)}"></i></div></div>`}).join('')||'<div style="text-align:center;color:var(--soft);padding:24px;font-size:13px">No budgets</div>'}
+</div>
+</div>
+<div class="card" style="padding:16px;margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+<div style="font-weight:700;font-size:14px">Payment activity (this period)</div><div style="font-size:11px;color:var(--soft);margin:-4px 0 10px">Net = money in − money out for the selected month (e.g. Bank includes Meralco if paid via Bank)</div>
+<button type="button" id="edit-credit-limit" class="btn-ghost" style="padding:4px 10px;font-size:11px">Credit limit: ${peso(creditLimit)}</button>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+${ALL_PAY.map(m=>{const v=bal[m]||0;const inn=payIn[m]||0;const out=payOut[m]||0;
+const extra=m==='Credit Card'
+?`<div style="font-size:10px;color:var(--soft);margin-top:4px">Spent ${peso(creditUsed)} · Limit ${peso(creditLimit)} · Avail ${peso(creditAvail)}</div>`
+:`<div style="font-size:10px;color:var(--soft);margin-top:4px">In ${peso(inn)} · Out ${peso(out)}</div>`;
+return`<div style="background:var(--muted);border-radius:14px;padding:12px"><div style="font-size:11px;color:var(--soft)">${m}</div><div style="font-weight:700;font-size:14px;color:${v>=0?'var(--sage-d)':'var(--rose)'}">${peso(v)}</div>${extra}</div>`}).join('')}
+</div></div>
+<div class="card" style="padding:16px"><div style="font-weight:700;font-size:14px;margin-bottom:12px">Recent Transactions</div>
+<div style="overflow-x:auto"><table style="width:100%;font-size:12.5px;border-collapse:collapse">
+<thead><tr style="color:var(--soft);text-align:left"><th style="padding:0 0 8px;font-weight:600">Date</th><th style="padding:0 0 8px">Desc</th><th style="padding:0 0 8px">Category</th><th style="padding:0 0 8px">Via / Wallet</th><th style="padding:0 0 8px">Type</th><th style="padding:0 0 8px;text-align:right">Amount</th></tr></thead>
+<tbody>${[...S.get('txs',[])].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8).map(t=>{const via=t.payment_method||'—';const isCard=/credit|debit/i.test(via);const viaShow=t.type==='income'&&isCard?'—':via;return`<tr style="border-top:1px solid var(--border)"><td style="padding:10px 0;white-space:nowrap">${fmt(t.date)}</td><td>${t.description||'—'}</td><td>${t.category_name||'—'}</td><td><span style="padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;background:var(--muted);color:var(--body)">${viaShow}</span></td><td><span style="padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;background:${t.type==='income'?'var(--sage-l)':'var(--rose-l)'};color:${t.type==='income'?'var(--sage-d)':'var(--rose)'}">${t.type}</span></td><td style="text-align:right;font-weight:700;color:${t.type==='income'?'var(--sage)':'var(--rose)'}">${t.type==='income'?'+':'-'}${peso(t.amount)}</td></tr>`}).join('')}</tbody>
+</table></div></div>
+<style>@media(min-width:768px){.stats{grid-template-columns:repeat(4,1fr)!important}.two-col{grid-template-columns:1fr 1fr!important}}</style>`;
+}
+
+function pageTx(){
+const f=st.filter;let list=txs();
+if(f.type!=='all')list=list.filter(t=>t.type===f.type);
+if(f.cat)list=list.filter(t=>t.category_id===f.cat);
+if(f.pay)list=list.filter(t=>(t.payment_method||'')===f.pay);
+if(f.q){const q=f.q.toLowerCase();list=list.filter(t=>`${t.description} ${t.category_name} ${t.payment_method}`.toLowerCase().includes(q))}
+const inc=txs().filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
+const exp=txs().filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
+const buds=S.get('buds',[]).filter(b=>b.month===st.month&&b.year===st.year).map(b=>({...b,spent:spent(b.category_id,b.category_name)}));
+const cats=S.get('cats',[]),rec=S.get('rec',[]);
+return `
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px">
+<h2 style="font-size:18px;font-weight:700">Transactions & Budget</h2>
+<div style="display:flex;gap:8px;align-items:center">${calPicker()}
+<button type="button" id="add-tx" class="btn-primary" style="padding:8px 14px;font-size:12px">${ic('p',14)} Add</button></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+<div class="card" style="padding:14px"><div style="font-size:10px;color:var(--soft);text-transform:uppercase">Income</div><div style="font-weight:700;color:var(--sage);font-size:16px">${peso(inc)}</div></div>
+<div class="card" style="padding:14px"><div style="font-size:10px;color:var(--soft);text-transform:uppercase">Expenses</div><div style="font-weight:700;color:var(--rose);font-size:16px">${peso(exp)}</div></div>
+<div style="border-radius:18px;padding:14px;background:var(--sage-d)"><div style="font-size:10px;color:rgba(255,255,255,.7);text-transform:uppercase">Remaining</div><div style="font-weight:700;color:#fff;font-size:16px">${peso(inc-exp)}</div></div>
+</div>
+<div class="card" style="padding:16px;margin-bottom:16px">
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><div style="font-weight:700;font-size:14px">Budgets</div>
+<button type="button" id="add-bud" class="btn-primary" style="padding:6px 12px;font-size:12px">${ic('p',12)} Set</button></div>
+${buds.map(b=>{const p=b.amount>0?Math.round(b.spent/b.amount*100):0;return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:600">${b.category_name}</span><span style="color:var(--soft)">${peso(b.spent)} / ${peso(b.amount)}</span></div><div class="progress"><i style="width:${Math.min(p,100)}%;background:${bc(p)}"></i></div></div>`}).join('')||'<div style="color:var(--soft);font-size:13px;text-align:center;padding:16px">No budgets</div>'}
+</div>
+<div class="card" style="padding:16px">
+<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;margin-bottom:12px">
+<div style="display:flex;gap:4px;background:var(--muted);border-radius:12px;padding:4px">
+${['all','income','expense'].map(t=>`<button type="button" data-ft="${t}" class="nav-pill ${f.type===t?'active':''}" style="padding:6px 12px;font-size:11px">${t}</button>`).join('')}
+</div>
+<button type="button" id="tog-rec" class="btn-ghost" style="padding:6px 12px;font-size:12px">${ic('rp',14)} Recurring</button>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+<input id="tx-q" placeholder="Search..." value="${f.q}" style="min-width:120px;font-size:12px;padding:8px 12px"/>
+<select id="tx-c" style="font-size:12px;padding:8px"><option value="">All categories</option>${cats.map(c=>`<option value="${c.id}" ${f.cat===c.id?'selected':''}>${c.name}</option>`).join('')}</select>
+<select id="tx-p" style="font-size:12px;padding:8px"><option value="">All payments</option>${PM.map(m=>`<option ${f.pay===m?'selected':''}>${m}</option>`).join('')}</select>
+</div>
+${st.showRec?`<div class="fade" style="background:var(--muted);border-radius:14px;padding:12px;margin-bottom:12px">
+<div style="font-weight:600;font-size:12px;margin-bottom:8px">Recurring rules</div>
+${rec.map(r=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0"><span>${r.description} · Day ${r.day} · ${peso(r.amount)}</span><span style="color:var(--sage-d)">Active</span></div>`).join('')}
+<button type="button" id="add-rec" style="font-size:12px;color:var(--sage);font-weight:600;margin-top:6px">+ Add rule</button>
+</div>`:''}
+${list.length?`<div style="overflow-x:auto"><table style="width:100%;font-size:12.5px;border-collapse:collapse">
+<thead><tr style="color:var(--soft)"><th style="text-align:left;padding-bottom:8px">Date</th><th style="text-align:left">Desc</th><th style="text-align:left">Cat</th><th style="text-align:left">Type</th><th style="text-align:right">Amt</th><th></th></tr></thead>
+<tbody>${list.map(t=>`<tr style="border-top:1px solid var(--border)"><td style="padding:10px 0">${fmt(t.date)}</td><td>${t.description||'—'}</td><td>${t.category_name||'—'}</td><td><span style="padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;background:${t.type==='income'?'var(--sage-l)':'var(--rose-l)'};color:${t.type==='income'?'var(--sage-d)':'var(--rose)'}">${t.type}</span></td><td style="text-align:right;font-weight:700;color:${t.type==='income'?'var(--sage)':'var(--rose)'}">${t.type==='income'?'+':'-'}${peso(t.amount)}</td><td><button type="button" data-dtx="${t.id}" style="color:var(--rose)">${ic('tr',14)}</button></td></tr>`).join('')}</tbody></table></div>`:'<div style="text-align:center;color:var(--soft);padding:32px;font-size:13px">No matches</div>'}
+</div>`;
+}
+
+function pageCats(){
+const cats=S.get('cats',[]),all=S.get('txs',[]);
+return `<div style="display:flex;justify-content:space-between;margin-bottom:20px"><h2 style="font-size:18px;font-weight:700">Categories</h2>
+<button type="button" id="add-cat" class="btn-primary" style="padding:8px 14px;font-size:13px">${ic('p',14)} Add</button></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+${cats.map(c=>{const n=all.filter(t=>t.category_id===c.id).length;return`<div class="card" style="padding:16px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:12px;background:${c.color}22;display:flex;align-items:center;justify-content:center"><div style="width:12px;height:12px;border-radius:50%;background:${c.color}"></div></div><div><div style="font-weight:600;font-size:14px">${c.name}</div><div style="font-size:11px;color:var(--soft)">${c.type} · ${n} tx</div></div></div>`}).join('')}
+</div>`;
+}
+
+function pageRep(){
+const t=txs(),inc=t.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),exp=t.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0);
+const by={};t.filter(x=>x.type==='expense').forEach(x=>{by[x.category_name]=(by[x.category_name]||0)+Number(x.amount)});
+const buds=S.get('buds',[]).filter(b=>b.month===st.month&&b.year===st.year).map(b=>({...b,spent:spent(b.category_id,b.category_name)}));
+return `
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-bottom:20px">
+<h2 style="font-size:18px;font-weight:700">Reports</h2>
+<div style="display:flex;gap:8px">${calPicker()}
+<button type="button" id="btn-csv" class="btn-ghost" style="padding:8px 12px;font-size:12px">${ic('dl',14)} CSV</button></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+<div class="card" style="padding:16px"><div style="font-size:10px;color:var(--soft);text-transform:uppercase">Income</div><div style="font-weight:700;color:var(--sage-d);font-size:18px">${peso(inc)}</div></div>
+<div class="card" style="padding:16px"><div style="font-size:10px;color:var(--soft);text-transform:uppercase">Expense</div><div style="font-weight:700;color:var(--rose);font-size:18px">${peso(exp)}</div></div>
+<div class="card" style="padding:16px"><div style="font-size:10px;color:var(--soft);text-transform:uppercase">Net</div><div style="font-weight:700;color:var(--sage-d);font-size:18px">${peso(inc-exp)}</div></div>
+</div>
+<div class="card" style="padding:16px;margin-bottom:16px"><div style="font-weight:700;font-size:14px;margin-bottom:12px">By Category</div>
+<table style="width:100%;font-size:13px">${Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([n,a])=>`<tr style="border-top:1px solid var(--border)"><td style="padding:8px 0">${n}</td><td style="text-align:right">${peso(a)}</td><td style="text-align:right;color:var(--soft)">${exp?((a/exp)*100).toFixed(1):0}%</td></tr>`).join('')}</table></div>
+<div class="card" style="padding:16px"><div style="font-weight:700;font-size:14px;margin-bottom:12px">Budget vs Actual</div>
+${buds.map(b=>{const p=b.amount>0?Math.round(b.spent/b.amount*100):0;return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:600">${b.category_name}</span><span style="color:var(--soft)">${peso(b.spent)} / ${peso(b.amount)}</span></div><div class="progress"><i style="width:${Math.min(p,100)}%;background:${bc(p)}"></i></div></div>`}).join('')}
+</div>`;
+}
+
+function pageGoals(){
+const g=S.get('goals',[]);
+return `<div style="display:flex;justify-content:space-between;margin-bottom:20px"><h2 style="font-size:18px;font-weight:700">Savings Goals</h2>
+<button type="button" id="add-goal" class="btn-primary" style="padding:8px 14px;font-size:13px">${ic('p',14)} New Goal</button></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+${g.map(x=>{const p=x.target>0?Math.round(x.current/x.target*100):0;return`<div class="card" style="padding:16px">
+<div style="display:flex;justify-content:space-between"><div><div style="font-weight:700;font-size:14px">${x.name}</div>${x.deadline?`<div style="font-size:11px;color:var(--soft)">Due ${fmt(x.deadline)}</div>`:''}</div>
+<button type="button" data-dg="${x.id}" style="color:var(--rose)">${ic('tr',14)}</button></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;margin:10px 0 4px"><span>${peso(x.current)}</span><span style="color:var(--soft)">of ${peso(x.target)}</span></div>
+<div class="progress"><i style="width:${Math.min(p,100)}%;background:${p>=100?'var(--sage)':bc(p)}"></i></div>
+<div style="font-size:11px;color:var(--soft);margin-top:4px">${p}%</div></div>`}).join('')||'<div class="card" style="padding:32px;text-align:center;color:var(--soft);grid-column:1/-1">No goals yet</div>'}
+</div>`;
+}
+
+function pageDebts(){
+const d=S.get('debts',[]),act=d.filter(x=>x.status==='active'),paid=d.filter(x=>x.status==='paid');
+return `<div style="display:flex;justify-content:space-between;margin-bottom:20px"><h2 style="font-size:18px;font-weight:700">Debts & Installments</h2>
+<button type="button" id="add-debt" class="btn-primary" style="padding:8px 14px;font-size:13px">${ic('p',14)} Add Debt</button></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+${act.map(x=>{const rem=x.total-x.paid,p=x.total>0?Math.round(x.paid/x.total*100):0;return`<div class="card" style="padding:16px">
+<div style="display:flex;justify-content:space-between"><div><div style="font-weight:700;font-size:14px">${x.name}</div><div style="font-size:11px;color:var(--soft)">${x.creditor||''}${x.due?' · Day '+x.due:''}${x.inst?' · '+peso(x.inst)+'/mo':''}</div></div>
+<button type="button" data-dd="${x.id}" style="color:var(--rose)">${ic('tr',14)}</button></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;margin:10px 0 4px"><span>Paid ${peso(x.paid)}</span><span style="color:var(--soft)">Left ${peso(rem)}</span></div>
+<div class="progress"><i style="width:${Math.min(p,100)}%;background:${bc(100-p)}"></i></div></div>`}).join('')||'<div class="card" style="padding:32px;text-align:center;color:var(--soft)">No active debts</div>'}
+</div>`;
+}
+
+function pageProf(){
+const u=st.user,ini=(u.name||'?').split(/\s+/).map(p=>p[0]).join('').slice(0,2).toUpperCase();
+const pend=S.get('reqs',[]).find(r=>r.user_id===u.id&&r.status==='pending');
+if(!st.editProf){
+return `<div style="max-width:400px;margin:0 auto">
+<h2 style="font-size:18px;font-weight:700;text-align:center;margin-bottom:20px">My Profile</h2>
+${pend?`<div class="card slide-up" style="padding:14px;margin-bottom:16px;border-color:var(--peach);background:var(--peach-l);font-size:13px">
+<div style="font-weight:600;margin-bottom:4px">Pending approval</div>
+${pend.requested_name==='__DELETE__'?'Account deletion requested':`${pend.requested_name?`Name → ${pend.requested_name}<br/>`:''}${pend.requested_email?`Email → ${pend.requested_email}`:''}`}
+<br/><button type="button" id="cancel-req" data-rid="${pend.id}" style="color:var(--rose);font-size:12px;font-weight:600;margin-top:6px">Cancel request</button>
+</div>`:''}
+<div class="card pop" style="padding:28px;text-align:center">
+<div class="avatar">${ini}</div>
+<div style="margin:16px 0 12px"><div style="font-weight:700;font-size:17px">${u.name}</div>
+<div style="font-size:13px;color:var(--soft)">${u.email}</div>
+<div style="font-size:11px;color:var(--sage);margin-top:4px;text-transform:capitalize">${u.role}</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:left;background:var(--muted);border-radius:14px;padding:12px;margin-bottom:20px">
+<div><div style="font-size:10px;text-transform:uppercase;color:var(--soft)">Birthday</div><div style="font-size:12.5px;font-weight:600">${u.birthday||'—'}</div></div>
+<div><div style="font-size:10px;text-transform:uppercase;color:var(--soft)">Sex</div><div style="font-size:12.5px;font-weight:600">${({male:'Male',female:'Female',other:'Other',prefer_not:'Prefer not'})[u.sex]||'—'}</div></div>
+<div><div style="font-size:10px;text-transform:uppercase;color:var(--soft)">Age</div><div style="font-size:12.5px;font-weight:600">${calcAge(u.birthday)??'—'}</div></div>
+</div>
+<button type="button" id="edit-prof" class="btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;font-size:15px">${ic('e',18)} Edit my Profile</button>
+${st.delStep===0?`<button type="button" id="del-acc" class="btn-danger" style="width:100%;margin-top:12px">Delete account</button>`:
+`<div class="fade" style="margin-top:12px"><p style="font-size:12px;color:var(--soft);margin-bottom:8px">Needs admin approval. Continue?</p>
+<div style="display:flex;gap:8px"><button type="button" id="del-back" class="btn-ghost" style="flex:1">Cancel</button>
+<button type="button" id="del-ok" class="btn-danger" style="flex:1;background:var(--rose);color:#fff">Confirm</button></div></div>`}
+</div></div>`;
+}
+return `<div style="max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
+<form id="f-info" class="card" style="padding:20px">
+<div style="font-weight:700;font-size:14px;margin-bottom:14px">Personal information</div>
+<label style="font-size:12px;color:var(--body);display:block;margin-bottom:4px">Name</label>
+<input name="name" value="${u.name}" style="width:100%;margin-bottom:12px"/>
+<label style="font-size:12px;color:var(--body);display:block;margin-bottom:4px">Email</label>
+<input name="email" type="email" value="${u.email}" style="width:100%;margin-bottom:12px"/>
+${st.infoStep===1?`<div style="background:var(--muted);border-radius:12px;padding:10px;font-size:13px;margin-bottom:12px">Confirm submit?</div>`:''}
+<div style="display:flex;gap:8px">
+<button type="button" id="info-back" class="btn-ghost" style="flex:1">${st.infoStep===1?'Back':'Cancel'}</button>
+<button type="submit" class="btn-primary" style="flex:1">${st.infoStep===0?'Continue':'Confirm'}</button>
+</div></form>
+<form id="f-details" class="card" style="padding:20px">
+<div style="font-weight:700;font-size:14px;margin-bottom:14px">Profile details</div>
+<label style="font-size:12px;color:var(--body);display:block;margin-bottom:4px">Birthday</label>
+<input name="birthday" type="date" value="${u.birthday||''}" style="width:100%;margin-bottom:12px"/>
+<label style="font-size:12px;color:var(--body);display:block;margin-bottom:4px">Sex</label>
+<select name="sex" style="width:100%;margin-bottom:8px">
+<option value="">Select</option>
+<option value="male" ${u.sex==='male'?'selected':''}>Male</option>
+<option value="female" ${u.sex==='female'?'selected':''}>Female</option>
+<option value="other" ${u.sex==='other'?'selected':''}>Other</option>
+<option value="prefer_not" ${u.sex==='prefer_not'?'selected':''}>Prefer not to say</option>
+</select>
+<div style="font-size:12px;color:var(--soft);margin-bottom:12px">Age (auto): ${calcAge(u.birthday)??'—'}</div>
+<button type="submit" class="btn-primary" style="width:100%">Save details</button>
+</form>
+<form id="f-pass" class="card" style="padding:20px">
+<div style="font-weight:700;font-size:14px;margin-bottom:14px">Change password</div>
+<label style="font-size:12px;color:var(--body);display:block;margin-bottom:4px">New password</label>
+<input name="p1" type="password" style="width:100%;margin-bottom:12px" placeholder="Min. 6 characters"/>
+<label style="font-size:12px;color:var(--body);display:block;margin-bottom:4px">Confirm</label>
+<input name="p2" type="password" style="width:100%;margin-bottom:12px"/>
+${st.passStep===1?`<label style="font-size:12px;color:var(--body);display:block;margin-bottom:4px">Type again</label><input name="p3" type="password" style="width:100%;margin-bottom:12px"/>`:''}
+<div style="display:flex;gap:8px">
+${st.passStep===1?`<button type="button" id="pass-back" class="btn-ghost" style="flex:1">Back</button>`:''}
+<button type="submit" class="btn-primary" style="flex:1;background:var(--sage-d)">${st.passStep===0?'Continue':'Confirm'}</button>
+</div></form></div>`;
+}
+
+function pageAdminReq(){
+const reqs=S.get('reqs',[]).filter(r=>r.status==='pending'),users=S.get('users',[]);
+return `<h2 style="font-size:18px;font-weight:700;margin-bottom:20px">Profile Requests</h2>
+${reqs.map(r=>{const u=users.find(x=>x.id===r.user_id);return`<div class="card" style="padding:16px;margin-bottom:12px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px">
+<div><div style="font-weight:600">${u?.name||'User'}</div><div style="font-size:12px;color:var(--soft)">${u?.email||''}</div>
+<div style="font-size:13px;margin-top:4px">${r.requested_name==='__DELETE__'?'Delete account':`${r.requested_name?`Name → ${r.requested_name} `:''}${r.requested_email?`Email → ${r.requested_email}`:''}`}</div></div>
+<div style="display:flex;gap:8px">
+<button type="button" data-ap="${r.id}" class="btn-primary" style="padding:8px 14px;font-size:12px">Approve</button>
+<button type="button" data-rj="${r.id}" class="btn-ghost" style="padding:8px 14px;font-size:12px;color:var(--rose)">Reject</button>
+</div></div>`}).join('')||'<div class="card" style="padding:32px;text-align:center;color:var(--soft)">No pending requests</div>'}`;
+}
+
+function pageAdminUsers(){
+return `<h2 style="font-size:18px;font-weight:700;margin-bottom:20px">Users</h2>
+<div class="card" style="overflow:hidden"><table style="width:100%;font-size:13px;border-collapse:collapse">
+<thead><tr style="color:var(--soft);background:var(--muted)"><th style="text-align:left;padding:12px">Name</th><th style="text-align:left;padding:12px">Email</th><th style="text-align:left;padding:12px">Role</th></tr></thead>
+<tbody>${S.get('users',[]).map(u=>`<tr style="border-top:1px solid var(--border)"><td style="padding:12px">${u.name}</td><td style="padding:12px">${u.email}</td><td style="padding:12px;text-transform:capitalize">${u.role}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function pageAdminAn(){
+const users=S.get('users',[]),all=S.get('txs',[]);
+const inc=all.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
+const exp=all.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
+return `<h2 style="font-size:18px;font-weight:700;margin-bottom:20px">Analytics</h2>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px">
+${[['Users',users.length],['Transactions',all.length],['Income',peso(inc)],['Expense',peso(exp)]].map(([l,v])=>`<div class="card" style="padding:16px"><div style="font-size:10px;color:var(--soft);text-transform:uppercase">${l}</div><div style="font-weight:700;font-size:18px">${v}</div></div>`).join('')}
+</div>`;
+}
+
+function authUI(){
+const m=st.auth;
+return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px" class="page-enter">
+<div class="card pop" style="width:100%;max-width:380px;padding:32px">
+<div style="text-align:center;margin-bottom:28px">${logo(56)}
+<h1 style="font-size:20px;font-weight:700;margin-top:12px"><span style="color:var(--sage)">Budget</span>Wise</h1>
+<p style="font-size:12px;color:var(--soft);margin-top:4px">${m==='login'?'Track · Plan · Prosper':m==='forgot'?'Forgot password':m==='reset'?'Reset password':'Create account'}</p></div>
+${m==='login'?`<form id="f-login" style="display:flex;flex-direction:column;gap:14px">
+<label style="font-size:12px;color:var(--body)">Email</label>
+<input name="email" type="email" required value="user@budgetwise.test"/>
+<label style="font-size:12px;color:var(--body)">Password</label>
+<input name="password" type="password" required value="password123"/>
+<button class="btn-primary" style="width:100%;margin-top:4px">Log in</button></form>
+<p style="text-align:center;margin-top:12px;font-size:13px"><button type="button" data-auth="forgot" style="color:var(--sage);font-weight:600">Forgot password?</button></p>
+<div style="margin-top:16px;background:var(--muted);border-radius:12px;padding:12px;font-size:11.5px;color:var(--soft);line-height:1.5"><strong style="color:var(--body)">Demo</strong><br/>admin@budgetwise.test / password123<br/>user@budgetwise.test / password123</div>
+<p style="text-align:center;margin-top:14px;font-size:13px;color:var(--soft)">No account? <button type="button" data-auth="register" style="color:var(--sage);font-weight:600">Create one</button></p>`:
+m==='register'?`<form id="f-reg" style="display:flex;flex-direction:column;gap:12px">
+<label style="font-size:12px;color:var(--body)">Name</label><input name="name" required/>
+<label style="font-size:12px;color:var(--body)">Email</label><input name="email" type="email" required/>
+<label style="font-size:12px;color:var(--body)">Password</label><input name="password" type="password" required minlength="6"/>
+<button class="btn-primary" style="width:100%">Create account</button></form>
+<p style="text-align:center;margin-top:14px;font-size:13px"><button type="button" data-auth="login" style="color:var(--sage);font-weight:600">Back to login</button></p>`:
+m==='forgot'?`<form id="f-forgot" style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:13px;color:var(--soft)">Works for user and admin accounts.</p>
+<label style="font-size:12px;color:var(--body)">Email</label><input name="email" type="email" required/>
+<button class="btn-primary" style="width:100%">Send reset</button></form>
+<p style="text-align:center;margin-top:14px;font-size:13px"><button type="button" data-auth="login" style="color:var(--sage);font-weight:600">Back</button></p>`:
+`<form id="f-reset" style="display:flex;flex-direction:column;gap:12px">
+<label style="font-size:12px;color:var(--body)">Email</label><input name="email" type="email" required value="${st.resetEmail||''}"/>
+<label style="font-size:12px;color:var(--body)">Temp password</label><input name="temp" required value="${st.tempPass||''}"/>
+<label style="font-size:12px;color:var(--body)">New password</label><input name="np" type="password" required minlength="6"/>
+<label style="font-size:12px;color:var(--body)">Confirm</label><input name="np2" type="password" required/>
+<button class="btn-primary" style="width:100%">Reset password</button></form>
+<p style="text-align:center;margin-top:14px;font-size:13px"><button type="button" data-auth="login" style="color:var(--sage);font-weight:600">Back</button></p>`}
+</div></div>`;
+}
+
+function modal(title,body){
+return `<div class="overlay" id="modal-bg"><div class="modal"><h2 style="font-weight:700;font-size:16px;margin-bottom:16px">${title}</h2>${body}</div></div>`;
+}
+function bind(){
+$$('[data-auth]').forEach(b=>b.onclick=()=>{st.auth=b.dataset.auth;render()});
+$$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+const menu=$('#btn-menu');if(menu)menu.onclick=()=>{st.menu=!st.menu;render()};
+const dk=$('#btn-dark');if(dk)dk.onclick=()=>{st.dark=!st.dark;dark();render()};
+const av=$('#btn-av');if(av)av.onclick=e=>{e.stopPropagation();st.prof=!st.prof;render()};
+const out=$('#btn-out');if(out)out.onclick=logout;
+const ecl=$('#edit-credit-limit');if(ecl)ecl.onclick=()=>{const cur=S.get('creditLimit',25000);const v=prompt('Set credit card limit (₱)',String(cur));if(v===null)return;const n=parseFloat(v);if(!isNaN(n)&&n>=0){S.set('creditLimit',n);toast('Credit limit updated');render()}};
+$$('[data-dis]').forEach(b=>b.onclick=()=>{st.dismissed.push(b.dataset.dis);render()});
+const cb=$('#cal-btn');if(cb)cb.onclick=e=>{e.stopPropagation();st.calOpen=!st.calOpen;render()};
+const cbg=$('#cal-bg');if(cbg)cbg.onclick=()=>{st.calOpen=0;render()};
+const cp=$('#cal-prev');if(cp)cp.onclick=e=>{e.stopPropagation();st.year--;render()};
+const cn=$('#cal-next');if(cn)cn.onclick=e=>{e.stopPropagation();st.year++;render()};
+$$('[data-m]').forEach(b=>b.onclick=e=>{e.stopPropagation();st.month=+b.dataset.m;st.calOpen=0;render()});
+const fl=$('#f-login');if(fl)fl.onsubmit=e=>{e.preventDefault();const fd=new FormData(fl);if(login(fd.get('email'),fd.get('password'))){toast('Welcome!');render()}else toast('Invalid credentials','err')};
+const fr=$('#f-reg');if(fr)fr.onsubmit=e=>{e.preventDefault();const fd=new FormData(fr);const users=S.get('users',[]);const email=String(fd.get('email')).toLowerCase();if(users.some(u=>u.email===email)){toast('Email taken','err');return}users.push({id:uid(),name:fd.get('name'),email,password:fd.get('password'),role:'user'});S.set('users',users);login(email,fd.get('password'));toast('Account created');render()};
+const ff=$('#f-forgot');if(ff)ff.onsubmit=e=>{e.preventDefault();const email=String(new FormData(ff).get('email')).toLowerCase();const users=S.get('users',[]);const u=users.find(x=>x.email===email);if(!u){toast('If email exists, reset sent');return}const temp='Reset'+Math.random().toString(36).slice(2,8)+'!';u.password=temp;S.set('users',users);st.resetEmail=email;st.tempPass=temp;st.auth='reset';toast('Temp password ready');render()};
+const freset=$('#f-reset');if(freset)freset.onsubmit=e=>{e.preventDefault();const fd=new FormData(freset);if(fd.get('np')!==fd.get('np2')){toast('Mismatch','err');return}const users=S.get('users',[]);const u=users.find(x=>x.email===String(fd.get('email')).toLowerCase()&&x.password===fd.get('temp'));if(!u){toast('Invalid reset','err');return}u.password=fd.get('np');S.set('users',users);st.auth='login';toast('Password reset');render()};
+$$('[data-ft]').forEach(b=>b.onclick=()=>{st.filter.type=b.dataset.ft;render()});
+const tq=$('#tx-q');if(tq)tq.oninput=()=>{st.filter.q=tq.value;render()};
+const tc=$('#tx-c');if(tc)tc.onchange=()=>{st.filter.cat=tc.value;render()};
+const tp=$('#tx-p');if(tp)tp.onchange=()=>{st.filter.pay=tp.value;render()};
+const tr=$('#tog-rec');if(tr)tr.onclick=()=>{st.showRec=!st.showRec;render()};
+const at=$('#add-tx');if(at)at.onclick=()=>{const cats=S.get('cats',[]);st.modal=modal('Add Transaction',`<form id="f-tx" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;gap:8px">${['expense','income'].map(t=>`<label style="flex:1;text-align:center;border:1.5px solid var(--border);border-radius:12px;padding:10px;font-size:13px"><input type="radio" name="type" value="${t}" ${t==='expense'?'checked':''}/> ${t}</label>`).join('')}</div>
+<input name="amount" type="number" step="0.01" min="0.01" required placeholder="Amount"/>
+<input name="date" type="date" required value="2026-09-07"/>
+<select name="cat"><option value="">Category</option>${cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+<input name="desc" placeholder="Description"/>
+<select name="pay" id="pay-select">${['Cash','GCash','Bank Transfer'].map(m=>`<option>${m}</option>`).join('')}</select>
+<p style="font-size:11px;color:var(--soft)">Income: Cash / GCash / Bank only. Cards available for expenses.</p>
+<div style="display:flex;gap:8px"><button class="btn-primary" style="flex:1">Save</button><button type="button" id="m-close" class="btn-ghost" style="flex:1">Cancel</button></div></form>`);render()};
+const csvB=$('#btn-csv');if(csvB)csvB.onclick=()=>{csv();toast('CSV downloaded')};
+$$('[data-dtx]').forEach(b=>b.onclick=()=>{S.set('txs',S.get('txs',[]).filter(t=>t.id!==b.dataset.dtx));toast('Deleted');render()});
+$$('[data-dg]').forEach(b=>b.onclick=()=>{S.set('goals',S.get('goals',[]).filter(g=>g.id!==b.dataset.dg));toast('Removed');render()});
+$$('[data-dd]').forEach(b=>b.onclick=()=>{S.set('debts',S.get('debts',[]).filter(d=>d.id!==b.dataset.dd));toast('Removed');render()});
+const ag=$('#add-goal');if(ag)ag.onclick=()=>{st.modal=modal('New Goal',`<form id="f-goal" style="display:flex;flex-direction:column;gap:10px">
+<input name="name" required placeholder="Goal name"/><input name="target" type="number" step="0.01" required placeholder="Target"/>
+<input name="cur" type="number" step="0.01" value="0" placeholder="Current"/><input name="deadline" type="date"/>
+<div style="display:flex;gap:8px"><button class="btn-primary" style="flex:1">Save</button><button type="button" id="m-close" class="btn-ghost" style="flex:1">Cancel</button></div></form>`);render()};
+const ad=$('#add-debt');if(ad)ad.onclick=()=>{st.modal=modal('Add Debt',`<form id="f-debt" style="display:flex;flex-direction:column;gap:10px">
+<input name="name" required placeholder="Name"/><input name="total" type="number" step="0.01" required placeholder="Total"/>
+<input name="paid" type="number" step="0.01" value="0" placeholder="Paid"/><input name="inst" type="number" step="0.01" placeholder="Monthly"/>
+<input name="due" type="number" min="1" max="31" placeholder="Due day"/><input name="cred" placeholder="Creditor"/>
+<div style="display:flex;gap:8px"><button class="btn-primary" style="flex:1">Save</button><button type="button" id="m-close" class="btn-ghost" style="flex:1">Cancel</button></div></form>`);render()};
+const mc=$('#m-close');if(mc)mc.onclick=()=>{st.modal=null;render()};
+const mb=$('#modal-bg');if(mb)mb.onclick=e=>{if(e.target===mb){st.modal=null;render()}};
+const paySel=$('#pay-select');$$('#f-tx input[name=type]').forEach(r=>r.onchange=()=>{if(!paySel)return;const income=r.value==='income'&&r.checked;const opts=income?['Cash','GCash','Bank Transfer']:PM;const cur=paySel.value;paySel.innerHTML=opts.map(m=>`<option>${m}</option>`).join('');if(opts.includes(cur))paySel.value=cur;});
+const ftx=$('#f-tx');if(ftx)ftx.onsubmit=e=>{e.preventDefault();const fd=new FormData(ftx);const type=fd.get('type'),amount=+fd.get('amount'),date=fd.get('date'),pay=fd.get('pay');const chk=canPay(pay,amount,date,type);if(!chk.ok){toast(chk.msg,'err');return}const cats=S.get('cats',[]);const cat=cats.find(c=>c.id===fd.get('cat'));const list=S.get('txs',[]);list.unshift({id:uid(),type,amount,date,description:fd.get('desc'),category_id:fd.get('cat')||null,category_name:cat?.name||'',payment_method:pay});S.set('txs',list);st.modal=null;toast('Saved');render()};
+const fg=$('#f-goal');if(fg)fg.onsubmit=e=>{e.preventDefault();const fd=new FormData(fg);const g=S.get('goals',[]);g.push({id:uid(),name:fd.get('name'),target:+fd.get('target'),current:+fd.get('cur')||0,deadline:fd.get('deadline')||null});S.set('goals',g);st.modal=null;toast('Goal created');render()};
+const fd_=$('#f-debt');if(fd_)fd_.onsubmit=e=>{e.preventDefault();const fd=new FormData(fd_);const d=S.get('debts',[]);d.push({id:uid(),name:fd.get('name'),total:+fd.get('total'),paid:+fd.get('paid')||0,inst:fd.get('inst')?+fd.get('inst'):null,due:fd.get('due')?+fd.get('due'):null,creditor:fd.get('cred')||'',status:'active'});S.set('debts',d);st.modal=null;toast('Debt added');render()};
+const ep=$('#edit-prof');if(ep)ep.onclick=()=>{st.editProf=1;render()};
+const da=$('#del-acc');if(da)da.onclick=()=>{st.delStep=1;render()};
+const db=$('#del-back');if(db)db.onclick=()=>{st.delStep=0;render()};
+const dok=$('#del-ok');if(dok)dok.onclick=()=>{const reqs=S.get('reqs',[]).filter(r=>!(r.user_id===st.user.id&&r.status==='pending'));reqs.push({id:uid(),user_id:st.user.id,requested_name:'__DELETE__',requested_email:null,status:'pending'});S.set('reqs',reqs);st.delStep=0;toast('Delete request sent to admin');render()};
+const cr=$('#cancel-req');if(cr)cr.onclick=()=>{S.set('reqs',S.get('reqs',[]).filter(r=>r.id!==cr.dataset.rid));toast('Cancelled');render()};
+const fdet=$('#f-details');if(fdet)fdet.onsubmit=e=>{e.preventDefault();const fd=new FormData(fdet);syncUser({birthday:fd.get('birthday')||null,sex:fd.get('sex')||null});toast('Details saved');st.editProf=0;render()};
+const fi=$('#f-info');if(fi)fi.onsubmit=e=>{e.preventDefault();const fd=new FormData(fi);const name=String(fd.get('name')).trim(),email=String(fd.get('email')).trim().toLowerCase();if(st.infoStep===0){if(name===st.user.name&&email===st.user.email){toast('No changes','err');return}st.infoStep=1;render();return}if(st.user.role==='admin'){syncUser({name,email});toast('Updated')}else{const reqs=S.get('reqs',[]).filter(r=>!(r.user_id===st.user.id&&r.status==='pending'));reqs.push({id:uid(),user_id:st.user.id,requested_name:name!==st.user.name?name:null,requested_email:email!==st.user.email?email:null,status:'pending'});S.set('reqs',reqs);toast('Request sent')}st.infoStep=0;st.editProf=0;render()};
+const ib=$('#info-back');if(ib)ib.onclick=()=>{if(st.infoStep===1)st.infoStep=0;else st.editProf=0;render()};
+const fp=$('#f-pass');if(fp)fp.onsubmit=e=>{e.preventDefault();const fd=new FormData(fp);const p1=fd.get('p1'),p2=fd.get('p2'),p3=fd.get('p3');if(!p1||p1.length<6){toast('Min 6 chars','err');return}if(p1!==p2){toast('Mismatch','err');return}if(st.passStep===0){st.passStep=1;render();return}if(p1!==p3){toast('2nd confirm mismatch','err');return}const users=S.get('users',[]);const u=users.find(x=>x.id===st.user.id);if(u){u.password=p1;S.set('users',users)}st.passStep=0;toast('Password updated');render()};
+const pb=$('#pass-back');if(pb)pb.onclick=()=>{st.passStep=0;render()};
+$$('[data-ap]').forEach(b=>b.onclick=()=>{const reqs=S.get('reqs',[]);const r=reqs.find(x=>x.id===b.dataset.ap);if(!r)return;r.status='approved';const users=S.get('users',[]);const u=users.find(x=>x.id===r.user_id);if(u&&r.requested_name!=='__DELETE__'){if(r.requested_name)u.name=r.requested_name;if(r.requested_email)u.email=r.requested_email;S.set('users',users);if(st.user&&st.user.id===u.id)syncUser({name:u.name,email:u.email})}if(r.requested_name==='__DELETE__'&&u){S.set('users',users.filter(x=>x.id!==u.id));if(st.user&&st.user.id===u.id)logout()}S.set('reqs',reqs);toast('Approved');render()});
+$$('[data-rj]').forEach(b=>b.onclick=()=>{const reqs=S.get('reqs',[]);const r=reqs.find(x=>x.id===b.dataset.rj);if(r)r.status='rejected';S.set('reqs',reqs);toast('Rejected');render()});
+const ac=$('#add-cat');if(ac)ac.onclick=()=>{const cols=['#7BA88A','#E8A87C','#D4897A','#A8C4D4','#C4B0D4','#E0B15C','#8BA888','#F0B8C8','#7A9E9F','#B5D0AD','#D4A5A5','#9DC3C2'];st.modal=modal('Add Category',`<form id="f-cat" style="display:flex;flex-direction:column;gap:10px">
+<input name="name" required placeholder="Name"/>
+<div style="display:flex;gap:8px">${['expense','income'].map(t=>`<label style="flex:1;text-align:center;border:1.5px solid var(--border);border-radius:12px;padding:10px;font-size:13px"><input type="radio" name="type" value="${t}" ${t==='expense'?'checked':''}/> ${t}</label>`).join('')}</div>
+<div style="font-size:12px;color:var(--body);margin-bottom:4px">Color</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">${cols.map((c,i)=>`<label style="cursor:pointer"><input type="radio" name="color" value="${c}" ${i===0?'checked':''} style="display:none"/><span data-swatch style="display:inline-block;width:28px;height:28px;border-radius:50%;background:${c};box-shadow:0 0 0 2px transparent;transition:transform .15s"></span></label>`).join('')}</div>
+<div style="display:flex;gap:8px;margin-top:8px"><button class="btn-primary" style="flex:1">Save</button><button type="button" id="m-close" class="btn-ghost" style="flex:1">Cancel</button></div></form>`);render();$$('[data-swatch]').forEach(s=>{const inp=s.parentElement.querySelector('input');const sync=()=>{$$('[data-swatch]').forEach(x=>x.style.boxShadow='0 0 0 2px transparent');if(inp.checked)s.style.boxShadow='0 0 0 3px var(--sage-d)';s.style.transform=inp.checked?'scale(1.15)':'scale(1)'};inp.onchange=sync;s.onclick=()=>{inp.checked=true;sync()};if(inp.checked)sync()})};
+const fc=$('#f-cat');if(fc)fc.onsubmit=e=>{e.preventDefault();const fd=new FormData(fc);const cats=S.get('cats',[]);cats.push({id:uid(),name:fd.get('name'),type:fd.get('type'),color:fd.get('color')||'#7BA88A'});S.set('cats',cats);st.modal=null;toast('Added');render()};
+const ab=$('#add-bud');if(ab)ab.onclick=()=>{const cats=S.get('cats',[]).filter(c=>c.type==='expense');st.modal=modal('Set Budget',`<form id="f-bud" style="display:flex;flex-direction:column;gap:10px">
+<select name="cat" required>${cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+<input name="amount" type="number" step="0.01" required placeholder="Amount"/>
+<div style="display:flex;gap:8px"><button class="btn-primary" style="flex:1">Save</button><button type="button" id="m-close" class="btn-ghost" style="flex:1">Cancel</button></div></form>`);render()};
+const fb=$('#f-bud');if(fb)fb.onsubmit=e=>{e.preventDefault();const fd=new FormData(fb);const cats=S.get('cats',[]);const cat=cats.find(c=>c.id===fd.get('cat'));const buds=S.get('buds',[]);buds.push({id:uid(),category_id:fd.get('cat'),category_name:cat?.name||'',amount:+fd.get('amount'),month:st.month,year:st.year});S.set('buds',buds);st.modal=null;toast('Budget set');render()};
+const ar=$('#add-rec');if(ar)ar.onclick=()=>{st.modal=modal('Add Recurring',`<form id="f-rec" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;gap:8px">${['expense','income'].map(t=>`<label style="flex:1;text-align:center;border:1.5px solid var(--border);border-radius:12px;padding:10px;font-size:13px"><input type="radio" name="type" value="${t}" ${t==='expense'?'checked':''}/> ${t}</label>`).join('')}</div>
+<input name="desc" required placeholder="Description"/><input name="amount" type="number" step="0.01" required placeholder="Amount"/>
+<input name="day" type="number" min="1" max="28" value="1" required placeholder="Day of month"/>
+<select name="pay">${PM.map(m=>`<option>${m}</option>`).join('')}</select>
+<div style="display:flex;gap:8px"><button class="btn-primary" style="flex:1">Save</button><button type="button" id="m-close" class="btn-ghost" style="flex:1">Cancel</button></div></form>`);render()};
+const fre=$('#f-rec');if(fre)fre.onsubmit=e=>{e.preventDefault();const fd=new FormData(fre);const rec=S.get('rec',[]);rec.push({id:uid(),type:fd.get('type'),amount:+fd.get('amount'),description:fd.get('desc'),day:+fd.get('day'),pay:fd.get('pay'),active:1});S.set('rec',rec);st.modal=null;toast('Rule added');render()};
+}
+
+function render(){
+dark();seed();
+const root=$('#app');
+if(!st.user){root.innerHTML=authUI();bind();return}
+const pages={dashboard:pageDash,transactions:pageTx,categories:pageCats,reports:pageRep,goals:pageGoals,debts:pageDebts,profile:pageProf,'admin-users':pageAdminUsers,'admin-requests':pageAdminReq,'admin-analytics':pageAdminAn};
+root.innerHTML=shell((pages[st.page]||pageDash)());
+bind();
+}
+seed();dark();render();
+</script>
+</body>
+</html>
